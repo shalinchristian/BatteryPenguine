@@ -3,242 +3,236 @@ import tkinter as tk
 import pygetwindow as gw
 import time
 
-canvas_width = 100
-canvas_height = 30
-last_net_io = psutil.net_io_counters()
-last_time = time.time()
-speed_text = "0▲|0▼"
-is_hidden = False
+# Configuration
+WIDTH = 100
+HEIGHT_FULL = 25
+HEIGHT_COLLAPSED = 7
+REFRESH_RATE = 1000  # ms
+BG_COLOR = "#000000"
+TEXT_COLOR = "#FFFFFF"
 
-# Cached values to reduce unnecessary calculations
-_cached_battery = None
-_battery_cache_time = 0
-_cached_windows = []
-_windows_cache_time = 0
+class BatteryMonitor:
+    def __init__(self):
+        self.is_hidden = False
+        self.speed_text = "0▲|0▼"
+        
+        # Network stats
+        self.last_net_io = psutil.net_io_counters()
+        self.last_time = time.time()
+        
+        # Initialize UI
+        self.setup_ui()
+        self.start_tasks()
 
-def get_battery_info():
-    global _cached_battery, _battery_cache_time
-    
-    current_time = time.time()
-    # Cache battery info for 2 seconds to reduce psutil calls
-    if current_time - _battery_cache_time > 2:
+    def setup_ui(self):
+        """Initialize all UI components"""
+        self.root = tk.Tk()
+        self.root.title("Battery+Network")
+        self.root.geometry(f"{WIDTH}x{HEIGHT_FULL}")
+        self.root.configure(bg=BG_COLOR)
+        self.root.wm_attributes('-alpha', 0.5)
+        self.root.overrideredirect(True)
+        self.root.attributes("-topmost", True)
+        
+        # Position window (screen_width - 350, y=0)
+        screen_width = self.root.winfo_screenwidth()
+        self.root.geometry(f"+{screen_width - 350}+0")
+        
+        # Main canvas
+        self.canvas = tk.Canvas(
+            self.root, 
+            width=WIDTH, 
+            height=HEIGHT_FULL, 
+            bg=BG_COLOR, 
+            highlightthickness=0
+        )
+        self.canvas.pack(fill="both", expand=True)
+        
+        # Battery percentage label
+        self.label = tk.Label(
+            self.canvas, 
+            text="", 
+            font=("Segoe UI", 12, "bold"), 
+            fg=TEXT_COLOR, 
+            bg=BG_COLOR
+        )
+        self.label.place(x=10, y=10, anchor="w")
+        
+        # Separator line
+        self.canvas.create_line(
+            0, 25, WIDTH, 25, 
+            fill="gray40", 
+            width=1, 
+            tag="separator"
+        )
+        
+        # Create toggle button in a separate top-level window
+        self.toggle_root = tk.Toplevel(self.root)
+        self.toggle_root.overrideredirect(True)
+        self.toggle_root.wm_attributes('-alpha', 0.5)
+        self.toggle_root.attributes("-topmost", True)
+        self.toggle_root.geometry(f"15x8+{screen_width - 350 - 15}+0")
+        self.toggle_root.configure(bg=BG_COLOR)
+        
+        # Toggle button canvas
+        self.toggle_canvas = tk.Canvas(
+            self.toggle_root,
+            width=15,
+            height=8,
+            bg=BG_COLOR,
+            highlightthickness=0
+        )
+        self.toggle_canvas.pack()
+        
+        # Toggle button elements
+        self.toggle_canvas.create_rectangle(
+            0, 0, 15, 8,
+            fill="gray30",
+            outline="",
+            tag="toggle_bg"
+        )
+        self.toggle_canvas.create_text(
+            7, 4,
+            text="˄",
+            fill="gray70",
+            font=("Segoe UI", 6),
+            tag="toggle_text"
+        )
+        
+        # Bind events
+        self.toggle_canvas.bind("<Button-1>", lambda e: self.toggle_visibility())
+        
+        # Right-click menu
+        self.menu = tk.Menu(self.root, tearoff=0)
+        self.menu.add_command(label="Close", command=self.close_app)
+        self.canvas.bind("<Button-3>", self.show_menu)
+
+        # Add these lines at the END of this method
+        self.root.protocol("WM_DELETE_WINDOW", self.close_app)
+        self.toggle_root.protocol("WM_DELETE_WINDOW", self.close_app)
+
+    def start_tasks(self):
+        """Start all background update tasks"""
+        self.update_battery()
+        self.update_network()
+        self.sync_toggle_position()
+
+    def sync_toggle_position(self):
+        """Keep toggle window positioned correctly"""
+        if not self.root.winfo_exists():
+            return
+            
+        x, y = self.root.winfo_x(), self.root.winfo_y()
+        self.toggle_root.geometry(f"15x8+{x - 15}+{y}")
+        self.root.after(50, self.sync_toggle_position)
+
+    def get_battery_info(self):
+        """Get battery info"""
         battery = psutil.sensors_battery()
         if battery:
-            _cached_battery = (battery.percent, battery.power_plugged)
+            return (battery.percent, battery.power_plugged)
+        return ("N/A", False)
+
+    def get_network_speed(self):
+        """Calculate current network speeds"""
+        current_net_io = psutil.net_io_counters()
+        current_time = time.time()
+        time_elapsed = current_time - self.last_time
+        
+        if time_elapsed < 0.1:
+            return self.speed_text
+        
+        upload = (current_net_io.bytes_sent - self.last_net_io.bytes_sent) * 8 / 1024 / time_elapsed
+        download = (current_net_io.bytes_recv - self.last_net_io.bytes_recv) * 8 / 1024 / time_elapsed
+        
+        def format_speed(speed):
+            return f"{speed/1000:.1f}M" if speed >= 1000 else f"{speed:.1f}K"
+        
+        result = f"{format_speed(upload)}▲" if upload > download else f"{format_speed(download)}▼"
+        
+        self.last_net_io = current_net_io
+        self.last_time = current_time
+        
+        return result
+
+    def update_battery(self):
+        """Update battery percentage display"""
+        percentage, charging = self.get_battery_info()
+        
+        if percentage == "N/A":
+            self.label.config(text="N/A", fg="gray")
         else:
-            _cached_battery = ("N/A", False)
-        _battery_cache_time = current_time
-    
-    return _cached_battery
-
-def get_network_speed():
-    global last_net_io, last_time
-    
-    current_net_io = psutil.net_io_counters()
-    current_time = time.time()
-    
-    time_elapsed = current_time - last_time
-    
-    # Only calculate if enough time has passed
-    if time_elapsed < 0.1:
-        return speed_text
-    
-    # Calculate speeds in Kbps (1 byte = 8 bits, so we multiply by 8)
-    upload_speed_kbps = (current_net_io.bytes_sent - last_net_io.bytes_sent) * 8 / 1024 / time_elapsed
-    download_speed_kbps = (current_net_io.bytes_recv - last_net_io.bytes_recv) * 8 / 1024 / time_elapsed
-    
-    # Convert to Mbps if speed is > 1000 Kbps
-    def format_speed(speed):
-        if speed >= 1000:
-            return f"{speed/1000:.1f}M"
-        return f"{speed:.1f}K"
-    
-    # Only show the more significant speed
-    if upload_speed_kbps > download_speed_kbps:
-        result = f"{format_speed(upload_speed_kbps)}▲"
-    else:
-        result = f"{format_speed(download_speed_kbps)}▼"
-    
-    # Update for next call
-    last_net_io = current_net_io
-    last_time = current_time
-    
-    return result
-
-def update_network_display():
-    global speed_text
-
-    new_speed = get_network_speed()
-    if new_speed != speed_text:
-        canvas.delete("speed")
-        speed_text = new_speed
+            self.label.config(text=f"{percentage}%")
+            
+            if charging:
+                color = "lime"
+            elif percentage <= 20:
+                color = "red"
+            elif percentage == 100:
+                color = "lime"
+            else:
+                color = "white"
+            
+            self.label.config(fg=color)
         
-        speed_x = canvas_width - 5
+        self.root.after(2000, self.update_battery)
+
+    def update_network(self):
+        """Update network speed display"""
+        new_speed = self.get_network_speed()
         
-        # Draw network speed indicator (small font)
-        canvas.create_text(
-            speed_x, canvas_height//2,
-            text=speed_text,
-            fill="white",
-            font=("Segoe UI", 7),
-            anchor="e",
-            tag="speed"
-        )
+        if new_speed != self.speed_text:
+            self.canvas.delete("speed")
+            self.speed_text = new_speed
+            
+            self.canvas.create_text(
+                WIDTH-10, 10,
+                text=new_speed,
+                fill=TEXT_COLOR,
+                font=("Segoe UI", 7),
+                anchor="e",
+                tag="speed",
+                state="normal" if not self.is_hidden else "hidden"
+            )
+        
+        self.root.after(REFRESH_RATE, self.update_network)
 
-    canvas.after(1000, update_network_display)
-
-def update_label():
-    percentage, charging = get_battery_info()
-
-    if percentage == "N/A":
-        if label.cget("text") != "N/A":  # Only update if changed
-            label.config(text="N/A", fg="gray")
-    else:
-        new_text = f"{percentage}%"
-        if label.cget("text") != new_text:  # Only update if changed
-            label.config(text=new_text)
-            label.place(x=10, rely=0.5, anchor="w")
-
-        # Determine color based on status
-        if charging:
-            new_color = "lime"  # Green when charging
-        elif percentage <= 20:
-            new_color = "red"
-        elif percentage == 100:
-            new_color = "lime"
+    def toggle_visibility(self):
+        """Toggle between expanded and collapsed states"""
+        if self.is_hidden:
+            # Show the battery and network info (expand)
+            self.is_hidden = False
+            self.toggle_canvas.itemconfig("toggle_text", text="˄")
+            self.root.geometry(f"{WIDTH}x{HEIGHT_FULL}")
+            self.label.place(x=10, y=10, anchor="w")
+            self.canvas.itemconfig("speed", state="normal")
+            self.canvas.itemconfig("separator", state="normal")
         else:
-            new_color = "white"
-        
-        if label.cget("fg") != new_color:  # Only update if color changed
-            label.config(fg=new_color)
+            # Hide the battery and network info (collapse)
+            self.is_hidden = True
+            self.toggle_canvas.itemconfig("toggle_text", text="˅")
+            self.root.geometry(f"{WIDTH}x{HEIGHT_COLLAPSED}")
+            self.label.place_forget()
+            self.canvas.itemconfig("speed", state="hidden")
+            self.canvas.itemconfig("separator", state="hidden")
 
-    root.after(2000, update_label)
-
-def check_fullscreen():
-    global _cached_windows, _windows_cache_time
-    
-    current_time = time.time()
-    # Cache window list for 1 second to reduce expensive window enumeration
-    if current_time - _windows_cache_time > 1:
+    def show_menu(self, event):
+        """Show right-click context menu"""
         try:
-            _cached_windows = gw.getWindowsWithTitle('')
-        except:
-            _cached_windows = []  # Handle potential errors
-        _windows_cache_time = current_time
-    
-    screen_width = root.winfo_screenwidth()
-    screen_height = root.winfo_screenheight()
+            self.menu.tk_popup(event.x_root, event.y_root)
+        finally:
+            self.menu.grab_release()
 
-    fullscreen_active = False
-    try:
-        fullscreen_active = any(
-            hasattr(window, 'isMaximized') and window.isMaximized and 
-            window.width >= screen_width and window.height >= screen_height
-            for window in _cached_windows
-        )
-    except:
-        pass  # Handle potential attribute errors
+    def close_app(self):
+        """Clean up and exit"""
+        self.toggle_root.destroy()
+        self.root.quit()
+        self.root.destroy()
 
-    if fullscreen_active:
-        if root.state() != "withdrawn":
-            root.withdraw()
-    else:
-        if root.state() == "withdrawn" and not is_hidden:
-            root.deiconify()
-            root.attributes("-topmost", True)
+    def run(self):
+        """Start the application"""
+        self.root.mainloop()
 
-    root.after(500, check_fullscreen)
-
-def prevent_minimize():
-    if root.state() == "iconic" and not is_hidden:
-        root.after(1, root.deiconify)
-        root.attributes("-topmost", True)
-    root.after(100, prevent_minimize)
-
-def keep_on_top():
-    if not is_hidden:
-        root.lift()
-        root.attributes("-topmost", True)
-    root.after(2000, keep_on_top)
-
-def toggle_visibility():
-    global is_hidden
-    if is_hidden:
-        # Show the main window
-        root.deiconify()
-        root.attributes("-topmost", True)
-        toggle_button.withdraw()
-        is_hidden = False
-    else:
-        # Hide the main window and show toggle button
-        root.withdraw()
-        toggle_button.deiconify()
-        toggle_button.attributes("-topmost", True)
-        is_hidden = True
-
-def close_app():
-    root.quit()
-    root.destroy()
-    toggle_button.quit()
-    toggle_button.destroy()
-
-# --- Tkinter Setup ---
-root = tk.Tk()
-root.title("Battery+Network")
-root.geometry(f"{canvas_width}x{canvas_height}")
-root.configure(bg='black')
-root.wm_attributes('-alpha', 0.5)
-root.overrideredirect(True)
-root.attributes("-topmost", True)
-
-# Position window
-screen_width = root.winfo_screenwidth()
-screen_height = root.winfo_screenheight()
-root.geometry(f"+{screen_width - 350}+0")
-
-# Canvas with label on top
-canvas = tk.Canvas(root, width=canvas_width, height=canvas_height, bg="black", highlightthickness=0)
-canvas.pack(fill="both", expand=True)
-
-label = tk.Label(canvas, text="", font=("Segoe UI", 12, "bold"), fg="white", bg="black")
-label.place(x=10, rely=0.5, anchor="w")
-
-# Create toggle button window (initially hidden)
-toggle_button = tk.Tk()
-toggle_button.title("Toggle")
-toggle_button.geometry("20x20")
-toggle_button.configure(bg='black')
-toggle_button.wm_attributes('-alpha', 0.7)
-toggle_button.overrideredirect(True)
-toggle_button.geometry(f"+{screen_width - 350}+0")
-toggle_button.withdraw()  # Initially hidden
-
-# Create the toggle button
-btn = tk.Button(toggle_button, text="○", font=("Arial", 8), 
-                bg="black", fg="white", bd=0, 
-                command=toggle_visibility, relief="flat",
-                activebackground="gray", activeforeground="white")
-btn.pack(fill="both", expand=True)
-
-# Right-click menu for main window
-menu = tk.Menu(root, tearoff=0)
-menu.add_command(label="Hide", command=toggle_visibility)
-menu.add_command(label="Close", command=close_app)
-label.bind("<Button-3>", lambda event: menu.post(event.x_root, event.y_root))
-
-# Right-click menu for toggle button
-toggle_menu = tk.Menu(toggle_button, tearoff=0)
-toggle_menu.add_command(label="Show", command=toggle_visibility)
-toggle_menu.add_command(label="Close", command=close_app)
-btn.bind("<Button-3>", lambda event: toggle_menu.post(event.x_root, event.y_root))
-
-root.protocol("WM_DELETE_WINDOW", lambda: root.deiconify())
-toggle_button.protocol("WM_DELETE_WINDOW", lambda: toggle_button.deiconify())
-
-# --- Start Everything ---
-update_label()
-update_network_display()
-check_fullscreen()
-prevent_minimize()
-keep_on_top()
-root.mainloop()
+if __name__ == "__main__":
+    app = BatteryMonitor()
+    app.run()
