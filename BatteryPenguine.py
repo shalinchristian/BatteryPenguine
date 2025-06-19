@@ -56,15 +56,7 @@ class BatteryMonitor:
             fg=TEXT_COLOR, 
             bg=BG_COLOR
         )
-        self.label.place(x=10, y=10, anchor="w")
-        
-        # Separator line
-        self.canvas.create_line(
-            0, 25, WIDTH, 25, 
-            fill="gray40", 
-            width=1, 
-            tag="separator"
-        )
+        self.label.place(x=10, y=10, anchor="w")    
         
         # Create toggle button in a separate top-level window
         self.toggle_root = tk.Toplevel(self.root)
