@@ -1,14 +1,3 @@
-#!/usr/bin/env python3
-"""
-Battery and Network Monitor
---------------------------
-A lightweight monitoring application that displays:
-- Battery percentage and charging status
-- Network speed (showing only higher of upload/download)
-- CPU usage graph
-with collapsible UI and theme support.
-"""
-
 import psutil
 import tkinter as tk
 import time
