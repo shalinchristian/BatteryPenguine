@@ -33,7 +33,7 @@ A quick look at the **BatteryPenguine** widget in action.
 
 -   **🔋 Real-time Monitoring:**
     -   **Battery:** Displays current percentage and charging status.
-    -   **Network Speed:** Shows the dominant network traffic (upload or download).
+    -   **Network Speed:** Shows the network Speed.
 -   **💡 Minimalist UI:**
     -   **Collapsible:** Minimize the widget with a single click.
     -   **Always-on-Top:** Stays visible over all other windows.
@@ -47,7 +47,7 @@ A quick look at the **BatteryPenguine** widget in action.
 
 1.  Go to the **Releases** page of this repository.
 2.  Download the latest **BatteryPenguine.exe** file.
-3.  Run the downloaded file—that's it! 🎉
+3.  Run the downloaded file to launch the application. Optionally, you can configure it to start automatically with your system.
 
 ### For Developers (Running from Source)
 
@@ -81,18 +81,6 @@ A quick look at the **BatteryPenguine** widget in action.
     ```
 2.  Right-click the widget to close the application.
 3.  Click the toggle button on the left to collapse or expand the widget.
-
----
-
-## 🐼 Development Version: BatteryPanda
-
-For those interested in the latest features, we have an ongoing development version called **BatteryPanda**. This version includes experimental features such as:
-
--   **Themes:** Switch between dark and light modes.
--   **CPU Usage Graph:** A live graph to visualize CPU load.
--   **Enhanced Tooltips:** More detailed system information on hover.
-
-You can run the development version from the source code.
 
 ---
 
