@@ -1,72 +1,99 @@
-BatteryPanda - A System Resource Monitor Overlay
-BatteryPanda is a lightweight, customizable desktop widget that provides a real-time overlay for monitoring your system's key metrics, including battery status, network speed, and CPU usage. It's designed to be unobtrusive, always on top, and easily collapsible.
+# 🐧 BatteryPenguine - A Lightweight System Monitor Overlay
 
-<!-- Replace with an actual screenshot URL -->
+**BatteryPenguine** is a simple, lightweight desktop widget that provides a real-time overlay for monitoring your system's key metrics, including **battery status** and **network speed**. It's designed to be unobtrusive, always on top, and easily collapsible.
 
-The project includes two main versions:
+![BatteryPenguine Screenshot](docs/images/penguine_screenshot.png)
+![BatteryPenguine Screenshot](docs/images/penguine_screenshot2.png)
+![BatteryPenguine Screenshot](docs/images/penguine_screenshot3.png)
+![BatteryPenguine Screenshot](docs/images/penguine_screenshot4.png)
 
-BatteryPanda.py: The main, feature-rich version with a graphical CPU usage line, tooltips, and theme support.
 
-BatteryPenguine.py: A simpler, more basic version focusing only on battery and network speed.
+---
 
-Features of BatteryPanda.py
-Real-time Monitoring:
+## 📖 Table of Contents
 
-Battery: Displays current percentage and charging status. The color changes for low battery and charging states.
+- [✨ Features](#-features)
+- [⚙️ Installation](#-installation)
+- [🚀 Usage](#-usage)
+- [🐼 Development Version: BatteryPanda](#-development-version-batterypanda)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
 
-Network Speed: Shows the dominant network traffic (either upload or download) in real-time.
+---
 
-CPU Usage: A live graph visualizes CPU load over the last 50 samples.
+## ✨ Features
 
-Customizable UI:
+-   **🔋 Real-time Monitoring:**
+    -   **Battery:** Displays current percentage and charging status.
+    -   **Network Speed:** Shows the dominant network traffic (upload or download).
+-   **💡 Minimalist UI:**
+    -   **Collapsible:** Minimize the widget with a single click.
+    -   **Always-on-Top:** Stays visible over all other windows.
+    -   **Lightweight:** Uses minimal system resources.
 
-Collapsible: A toggle button allows you to minimize the widget to a compact bar.
+---
 
-Themes: Switch between dark and light modes with a right-click.
+## ⚙️ Installation
 
-Tooltips: Hover over the battery or network display for more detailed statistics.
+### For Users (Recommended)
 
-Always-on-Top: The widget stays on top of all other windows for constant visibility.
+1.  Go to the **Releases** page of this repository.
+2.  Download the latest **BatteryPenguine.exe** file.
+3.  Run the downloaded file—that's it! 🎉
 
-Lightweight: Minimal resource consumption.
+### For Developers (Running from Source)
 
-Requirements
-You'll need Python installed, along with a few libraries.
+**Prerequisites:**
 
-Python 3.x
+* Python 3.x
+* Pip
 
-psutil
+**Installation:**
 
-tkinter (usually included with Python)
+1.  Clone the repository:
+    ```bash
+    git clone [https://github.com/shalinchristian/BatteryPenguine.git](https://github.com/shalinchristian/BatteryPenguine.git)
+    ```
+2.  Navigate to the project directory:
+    ```bash
+    cd BatteryPenguine
+    ```
+3.  Install the required packages:
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-You can install the necessary package using pip:
+---
 
-pip install psutil
+## 🚀 Usage
 
-How to Use
-Download the Files: Get BatteryPanda.py and (optionally) BatteryPenguine.py.
+1.  From the project's root directory (`BatteryPenguine/`), run the application as a module:
+    ```bash
+    python -m src.batterypenguine.main
+    ```
+2.  Right-click the widget to close the application.
+3.  Click the toggle button on the left to collapse or expand the widget.
 
-Run the Script: Execute the script from your terminal.
+---
 
-python BatteryPanda.py
+## 🐼 Development Version: BatteryPanda
 
-Interact with the Widget:
+For those interested in the latest features, we have an ongoing development version called **BatteryPanda**. This version includes experimental features such as:
 
-The widget will appear in the top-right corner of your screen.
+-   **Themes:** Switch between dark and light modes.
+-   **CPU Usage Graph:** A live graph to visualize CPU load.
+-   **Enhanced Tooltips:** More detailed system information on hover.
 
-Click the side toggle button to collapse or expand the view.
+You can run the development version from the source code.
 
-Right-click on the widget to open a context menu to switch themes or exit the application.
+---
 
-Hover your mouse over the text to see detailed tooltips.
+## 🤝 Contributing
 
-Drag and drop the widget to move it (Note: This functionality is not yet implemented).
+Contributions are welcome! Please read the [CONTRIBUTING.md](CONTRIBUTING.md) file for details on our code of conduct and the process for submitting pull requests.
 
-File Descriptions
-BatteryPanda.py
-This is the recommended script to use. It's a more polished and feature-complete version of the monitor. It includes a Config class for easy customization of colors, refresh rates, and window dimensions.
+---
 
-BatteryPenguine.py
-A simpler and earlier version of the application. It lacks the CPU graph, theme options, and tooltips but provides the core functionality of monitoring battery and network speed. It uses the pygetwindow library, which is not required for BatteryPanda.py.
+## 📄 License
 
-Feel free to modify the code, especially the Config class in BatteryPanda.py, to personalize the widget's appearance and behavior to your liking.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
