@@ -2,9 +2,13 @@
 
 **BatteryPenguine** is a simple, lightweight desktop widget that provides a real-time overlay for monitoring your system's key metrics, including **battery status** and **network speed**. It's designed to be unobtrusive, always on top, and easily collapsible.
 
+# Speed Indicator(On Charging-Green Text)
 ![BatteryPenguine Screenshot](docs/images/penguine_screenshot.png)
+# Off Charging
 ![BatteryPenguine Screenshot](docs/images/penguine_screenshot2.png)
+# Collapsed
 ![BatteryPenguine Screenshot](docs/images/penguine_screenshot3.png)
+# Close
 ![BatteryPenguine Screenshot](docs/images/penguine_screenshot4.png)
 
 
