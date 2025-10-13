@@ -8,7 +8,7 @@
 
 A quick look at the **BatteryPenguine** widget in action.
 
-| On Charging (Green Text) | Off Charging (Low Battery) |
+| On Charging (Green Text) | Off Charging (White Text) |
 | :---: | :---: |
 | ![Charging State](docs/images/penguine_screenshot_charging.png) | ![Off Charging State](docs/images/penguine_screenshot_off_charging.png) |
 
