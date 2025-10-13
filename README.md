@@ -23,7 +23,6 @@ A quick look at the **BatteryPenguine** widget in action.
 - [✨ Features](#-features)
 - [⚙️ Installation](#-installation)
 - [🚀 Usage](#-usage)
-- [🐼 Development Version: BatteryPanda](#-development-version-batterypanda)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
 
