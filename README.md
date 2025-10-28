@@ -60,7 +60,7 @@ A quick look at the **BatteryPenguine** widget in action.
 
 1.  Clone the repository:
     ```bash
-    git clone [https://github.com/shalinchristian/BatteryPenguine.git](https://github.com/shalinchristian/BatteryPenguine.git)
+    git clone https://github.com/shalinchristian/BatteryPenguine.git
     ```
 2.  Navigate to the project directory:
     ```bash
