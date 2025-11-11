@@ -84,18 +84,6 @@ A quick look at the **BatteryPenguine** widget in action.
 
 ---
 
-## 🐼 Development Version: BatteryPanda
-
-For those interested in the latest features, we have an ongoing development version called **BatteryPanda**. This version includes experimental features such as:
-
--   **Themes:** Switch between dark and light modes.
--   **CPU Usage Graph:** A live graph to visualize CPU load.
--   **Enhanced Tooltips:** More detailed system information on hover.
-
-You can run the development version from the source code.
-
----
-
 ## 🤝 Contributing
 
 Contributions are welcome! Please read the [CONTRIBUTING.md](CONTRIBUTING.md) file for details on our code of conduct and the process for submitting pull requests.
